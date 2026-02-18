@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a0f">
+<title>BULK MODE 🏋️</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;max-width:480px;margin:0 auto;overflow-x:hidden;min-height:100vh}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+input{-webkit-appearance:none;appearance:none}
+button{-webkit-appearance:none;appearance:none}
+::-webkit-scrollbar{width:0;height:0}
+.header{background:linear-gradient(135deg,#ff6b35,#f7c948);padding:14px 18px 12px;position:sticky;top:0;z-index:50}
+.tab-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(10,10,15,.97);border-top:1px solid #1a1a1a;display:flex;padding:5px 0 max(8px,env(safe-area-inset-bottom));z-index:100;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.tab-btn{flex:1;background:none;border:none;color:#444;cursor:pointer;text-align:center;padding:2px 0;transition:color .2s}
+.tab-btn.active{color:#ff6b35}
+.tab-btn .icon{font-size:18px;margin-bottom:1px}
+.tab-btn .label{font-size:8px;font-weight:400}
+.tab-btn.active .label{font-weight:700}
+.content{padding:12px 16px;padding-bottom:80px;min-height:60vh}
+.card{background:rgba(255,255,255,.03);border-radius:14px;padding:14px;margin-bottom:10px;border:1px solid rgba(255,255,255,.06)}
+.bar-wrap{width:100%}
+.bar-label{display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:2px}
+.bar-bg{width:100%;height:8px;background:rgba(255,255,255,.06);border-radius:20px;overflow:hidden}
+.bar-fill{height:100%;border-radius:20px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+.stat{flex:1;border-radius:12px;padding:10px 6px;text-align:center}
+.stat .val{font-size:18px;font-weight:900}
+.stat .lbl{font-size:9px;color:#777}
+.inp{padding:9px 12px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;font-size:13px;outline:none;width:100%}
+.inp:focus{border-color:#ff6b35}
+.btn{padding:10px 18px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;border:none;transition:opacity .2s}
+.btn:active{opacity:.7}
+.btn-primary{background:#ff6b35;color:#000}
+.btn-outline{background:rgba(255,107,53,.1);color:#ff6b35;border:1px solid rgba(255,107,53,.25)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-full{width:100%}
+.btn-danger{background:rgba(239,83,80,.08);color:#ef5350;border:1px solid rgba(239,83,80,.2)}
+.overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.overlay-bg{position:absolute;inset:0;background:rgba(0,0,0,.7)}
+.modal{position:relative;width:100%;max-width:480px;max-height:85vh;background:#151520;border-radius:20px 20px 0 0;padding:20px 16px;overflow-y:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-title{font-size:16px;font-weight:800}
+.modal-close{background:#222;border:none;color:#888;width:32px;height:32px;border-radius:10px;font-size:16px;cursor:pointer}
+.meal-card{border-radius:12px;overflow:hidden;transition:all .2s}
+.meal-check{width:26px;height:26px;border-radius:7px;border:2px solid #444;background:transparent;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.meal-check.done{border:none;background:#4caf50}
+.chip{padding:1px 6px;border-radius:12px;font-size:10px;font-weight:700}
+.day-btn{min-width:48px;padding:6px 3px;border-radius:10px;border:2px solid #222;background:#111;color:#666;cursor:pointer;text-align:center;font-size:11px;transition:all .15s}
+.day-btn.active{border-color:#ff6b35;background:rgba(255,107,53,.12);color:#ff6b35}
+.shop-item{border-radius:11px;padding:9px 10px;border:1px solid rgba(255,255,255,.04);transition:all .2s}
+.shop-item.done{background:rgba(76,175,80,.05);border-color:rgba(76,175,80,.15)}
+.qty-btn{width:36px;height:28px;border-radius:8px;border:none;font-weight:900;font-size:16px;cursor:pointer;transition:opacity .15s}
+.qty-btn:active{opacity:.6}
+.prod-row{display:flex;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);align-items:center;cursor:pointer;transition:background .15s}
+.prod-row:active{background:rgba(255,255,255,.03)}
+.emoji-btn{width:36px;height:36px;border-radius:8px;font-size:18px;border:none;cursor:pointer;transition:transform .1s}
+.emoji-btn:active{transform:scale(.9)}
+.prep-btn{margin-top:6px;margin-left:34px;padding:3px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:#777;font-size:10px;cursor:pointer}
+.prep-content{padding:8px 12px 10px 48px;background:rgba(247,201,72,.03);border-top:1px solid rgba(255,255,255,.03);font-size:11px;color:#bbb;line-height:1.5}
+.history-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#111;border-radius:10px}
+@media(max-width:380px){.stat .val{font-size:15px}.header{padding:12px 14px 10px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script type="text/babel">
+const {useState,useReducer,useEffect,useCallback}=React;
+
+// ═══ STORAGE ═══
+const STORAGE_KEY="bulkmode_v2";
+const save=s=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify(s))}catch(e){}};
+const load=()=>{try{const d=localStorage.getItem(STORAGE_KEY);return d?JSON.parse(d):null}catch(e){return null}};
+
+// ═══ DATA ═══
+const DEF_PRODUCTS=[
+  {id:"chicken_fillet",name:"ქათმის ფილე",unit:"კგ",price:10.3,prot:23,cal:133,store:"Sursati",emoji:"🍗"},
+  {id:"chicken_thigh",name:"ქათმის ბარკალი",unit:"კგ",price:7.5,prot:18,cal:190,store:"Sursati",emoji:"🍗"},
+  {id:"eggs_30",name:"კვერცხი (30ც)",unit:"შეფუთვა",price:10.5,prot:13,cal:155,store:"2 ნაბიჯი",emoji:"🥚"},
+  {id:"oats",name:"შვრია",unit:"კგ",price:2.9,prot:13,cal:367,store:"Sursati",emoji:"🥣"},
+  {id:"rice",name:"ბრინჯი",unit:"კგ",price:2.5,prot:7,cal:365,store:"Sursati",emoji:"🍚"},
+  {id:"cottage",name:"ხაჭო",unit:"კგ",price:7.5,prot:18,cal:113,store:"2 ნაბიჯი",emoji:"🧀"},
+  {id:"yogurt",name:"მაწონი",unit:"ლიტრი",price:3.0,prot:5,cal:56,store:"2 ნაბიჯი",emoji:"🥛"},
+  {id:"lentils",name:"ოსპი",unit:"კგ",price:5.6,prot:25,cal:353,store:"Sursati",emoji:"🫘"},
+  {id:"beans",name:"ლობიო",unit:"კგ",price:3.8,prot:21,cal:333,store:"ბაზარი",emoji:"🫘"},
+  {id:"pasta",name:"მაკარონი",unit:"კგ",price:3.4,prot:12,cal:350,store:"2 ნაბიჯი",emoji:"🍝"},
+  {id:"pb",name:"არაქისის კარაქი",unit:"350გ",price:7.5,prot:25,cal:588,store:"ევროპროდუქტი",emoji:"🥜"},
+  {id:"banana",name:"ბანანი",unit:"კგ",price:4.0,prot:1,cal:89,store:"მაგნიტი",emoji:"🍌"},
+  {id:"bread",name:"პური (რუხი)",unit:"ცალი",price:1.2,prot:9,cal:250,store:"2 ნაბიჯი",emoji:"🍞"},
+  {id:"oil",name:"ზეთი",unit:"ლიტრი",price:4.5,prot:0,cal:884,store:"Sursati",emoji:"🫒"},
+  {id:"apple",name:"ვაშლი",unit:"კგ",price:2.8,prot:0,cal:52,store:"ბაზარი",emoji:"🍎"},
+  {id:"nuts",name:"თხილი/ნუში",unit:"200გ",price:5.0,prot:15,cal:607,store:"ბაზარი",emoji:"🌰"},
+  {id:"veggies",name:"ბოსტნეული",unit:"კგ",price:3.0,prot:2,cal:30,store:"ბაზარი",emoji:"🥬"},
+  {id:"honey",name:"თაფლი",unit:"500გ",price:12.0,prot:0,cal:304,store:"ბაზარი",emoji:"🍯"},
+];
+
+const DEF_NEEDS=[
+  {id:"chicken_fillet",qty:12},{id:"eggs_30",qty:6},{id:"oats",qty:3},{id:"rice",qty:5},
+  {id:"cottage",qty:4},{id:"yogurt",qty:9},{id:"lentils",qty:2},{id:"beans",qty:2},
+  {id:"pasta",qty:3},{id:"pb",qty:2},{id:"banana",qty:7},{id:"bread",qty:15},
+  {id:"oil",qty:1},{id:"veggies",qty:5},{id:"nuts",qty:3},
+];
+
+const MENU=[
+  {day:"ორშ",emoji:"💪",meals:[
+    {t:"08:00",l:"საუზმე",d:"შვრია 100გ + 3 კვერცხი + ბანანი + თაფლი",p:28,c:650,prep:"შვრია წყალში 5წთ, კვერცხი შეწვი"},
+    {t:"10:30",l:"სნეკი",d:"არაქისის კარაქი 2ს/კ + პური 2ნაჭ.",p:12,c:350,prep:"პურზე წაისვი"},
+    {t:"13:00",l:"ლანჩი",d:"ქათმის ფილე 250გ + ბრინჯი 150გ + სალათი",p:55,c:780,prep:"ქათმი ტაფაზე 6-7წთ ორივე მხრიდან"},
+    {t:"16:00",l:"სნეკი 2",d:"3 მოხარშული კვერცხი + ბანანი",p:20,c:330,prep:"წინასწარ მოხარშული მაცივრიდან"},
+    {t:"19:00",l:"ვახშამი",d:"ქათმი 200გ + მაკარონი 120გ + ბოსტნეული",p:48,c:700,prep:"მაკარონი მოხარშე, ქათმი შეწვი"},
+    {t:"22:00",l:"ძილის წინ",d:"ხაჭო 200გ + თხილი 30გ",p:22,c:280,prep:"ხაჭო + თხილი ზემოდან"},
+  ]},
+  {day:"სამ",emoji:"🔥",meals:[
+    {t:"08:00",l:"საუზმე",d:"შვრია 100გ + 2 კვერცხი + თაფლი",p:22,c:580,prep:"შვრია + ომლეტი"},
+    {t:"10:30",l:"სნეკი",d:"ხაჭო 150გ + ბანანი",p:15,c:280,prep:"შეურიე"},
+    {t:"13:00",l:"ლანჩი",d:"ქათმის ბარკალი 300გ + ბრინჯი 150გ + სალათი",p:50,c:820,prep:"ბარკალი ღუმელში 25-30წთ"},
+    {t:"16:00",l:"სნეკი 2",d:"შვრია 50გ + არაქისის კარაქი",p:12,c:320,prep:"შეურიე"},
+    {t:"19:00",l:"ვახშამი",d:"ოსპის წვნიანი + ქათმი 150გ + პური",p:45,c:720,prep:"ოსპი 15-20წთ ხახვით"},
+    {t:"22:00",l:"ძილის წინ",d:"მაწონი 300მლ + თხილი 30გ",p:18,c:260,prep:"ჭიქაში"},
+  ]},
+  {day:"ოთხ",emoji:"⚡",meals:[
+    {t:"08:00",l:"საუზმე",d:"ომლეტი 4 კვერცხი + ყველი 30გ + პური",p:34,c:650,prep:"ტაფაზე 3-4წთ"},
+    {t:"10:30",l:"სნეკი",d:"ბანანი 2ცალი + არაქისის კარაქი",p:10,c:380,prep:"ბანანი + კარაქი"},
+    {t:"13:00",l:"ლანჩი",d:"ქათმის ფილე 250გ + ბრინჯი 150გ + სალათი",p:55,c:780,prep:"Meal prep-იდან!"},
+    {t:"16:00",l:"სნეკი 2",d:"მოხარშული კვერცხი 3 + ვაშლი",p:19,c:300,prep:"მაცივრიდან"},
+    {t:"19:00",l:"ვახშამი",d:"ლობიო + ბრინჯი 150გ + ქათმი 150გ",p:44,c:720,prep:"ლობიო 40-50წთ (წინა ღამით დალბე!)"},
+    {t:"22:00",l:"ძილის წინ",d:"ხაჭო 200გ + ბანანი",p:20,c:260,prep:"შეურიე"},
+  ]},
+  {day:"ხუთ",emoji:"🏋️",meals:[
+    {t:"08:00",l:"საუზმე",d:"შვრია 100გ + 3 კვერცხი + ვაშლი",p:28,c:620,prep:"შვრია + მოხარშული კვერცხი"},
+    {t:"10:30",l:"სნეკი",d:"პური + არაქ. კარაქი + თაფლი",p:10,c:400,prep:"სენდვიჩი"},
+    {t:"13:00",l:"ლანჩი",d:"ქათმის ბარკალი 300გ + მაკარონი 150გ",p:50,c:800,prep:"ბარკალი ტაფაზე/ღუმელში"},
+    {t:"16:00",l:"სნეკი 2",d:"ხაჭო 200გ + ბანანი",p:20,c:280,prep:"ხაჭო + ბანანი"},
+    {t:"19:00",l:"ვახშამი",d:"ქათმის ფილე 200გ + ბრინჯი 150გ + სალათი",p:48,c:700,prep:"Meal prep"},
+    {t:"22:00",l:"ძილის წინ",d:"მაწონი 300მლ + თხილი 30გ",p:18,c:260,prep:"ჭიქაში"},
+  ]},
+  {day:"პარ",emoji:"💥",meals:[
+    {t:"08:00",l:"საუზმე",d:"კვერცხი 4 ტაფაზე + პური + ბანანი",p:30,c:640,prep:"4 კვერცხი + ზეთი"},
+    {t:"10:30",l:"სნეკი",d:"შვრია 80გ + ბანანი + თაფლი",p:12,c:380,prep:"შვრია + ბანანი + თაფლი"},
+    {t:"13:00",l:"ლანჩი",d:"ქათმის ფილე 250გ + ბრინჯი 150გ + კომბოსტო",p:55,c:760,prep:"Meal prep!"},
+    {t:"16:00",l:"სნეკი 2",d:"არაქ. კარაქი + პური",p:12,c:350,prep:"სენდვიჩი"},
+    {t:"19:00",l:"ვახშამი",d:"ოსპი + ქათმი 200გ + სალათი",p:48,c:720,prep:"ოსპი 15-20წთ"},
+    {t:"22:00",l:"ძილის წინ",d:"ხაჭო 200გ + ვაშლი",p:18,c:230,prep:"ხაჭო + ვაშლი"},
+  ]},
+  {day:"შაბ",emoji:"🎯",meals:[
+    {t:"08:00",l:"საუზმე",d:"შვრიის ბლინი (3კვერცხი) + თაფლი + ბანანი",p:26,c:680,prep:"ბლენდერში შვრია+კვერცხი+რძე, ტაფაზე 2წთ"},
+    {t:"10:30",l:"სნეკი",d:"ხაჭო 200გ + არაქისის კარაქი",p:22,c:380,prep:"შეურიე"},
+    {t:"13:00",l:"ლანჩი",d:"ქათმის ფილე 300გ + ბრინჯი 200გ + სალათი",p:62,c:900,prep:"დასვენების დღე — მეტი ჭამე!"},
+    {t:"16:00",l:"სნეკი 2",d:"მოხარშ. კვერცხი 3 + ვაშლი",p:19,c:300,prep:"მაცივრიდან"},
+    {t:"19:00",l:"ვახშამი",d:"ლობიო + მაკარონი + ქათმი 200გ",p:44,c:740,prep:"ლობიო + მაკარონი + ქათმი"},
+    {t:"22:00",l:"ძილის წინ",d:"მაწონი + თხილი",p:16,c:250,prep:"ჭიქაში"},
+  ]},
+  {day:"კვი",emoji:"🔄",meals:[
+    {t:"08:00",l:"საუზმე",d:"ომლეტი 4 კვერცხი + ყველი + პური",p:34,c:680,prep:"MEAL PREP დღე! მოხარშე ბრინჯი/კვერცხი კვირისთვის"},
+    {t:"10:30",l:"სნეკი",d:"ბანანი 2 + არაქ. კარაქი",p:10,c:380,prep:""},
+    {t:"13:00",l:"ლანჩი",d:"ქათმის ბარკალი 300გ + ბრინჯი 200გ",p:52,c:840,prep:"მოამზადე კვირისთვისაც"},
+    {t:"16:00",l:"სნეკი 2",d:"ხაჭო 200გ + ბანანი",p:20,c:280,prep:""},
+    {t:"19:00",l:"ვახშამი",d:"ოსპის წვნიანი + ქათმი 200გ + პური",p:45,c:720,prep:"ოსპის წვნიანი მეტი გააკეთე — გაყინე!"},
+    {t:"22:00",l:"ძილის წინ",d:"ხაჭო 150გ + თხილი 30გ",p:18,c:260,prep:""},
+  ]},
+];
+
+const MC=["#ff6b35","#f7c948","#4caf50","#29b6f6","#ab47bc","#78909c"];
+const EMOJIS=["🍗","🥚","🥣","🍚","🧀","🥛","🫘","🍝","🥜","🍌","🍞","🫒","🍎","🌰","🥬","🍯","🥩","🐟","🥦","🍠","🥕","🫐","🍓","🥝","🧈","🥫","🍖","🌽","🍆","🧅","🫑","🥒","🍇","🍊"];
+
+const init={products:DEF_PRODUCTS,needs:DEF_NEEDS,purchased:{},log:[],spent:0,budget:400,meals:{},wLog:[],day:0,weight:62};
+
+function reducer(s,a){
+  let n;
+  switch(a.type){
+    case "INIT":return{...init,...a.d};
+    case "DAY":n={...s,day:a.v};break;
+    case "MEAL":{const k=`${a.di}-${a.mi}`;n={...s,meals:{...s.meals,[k]:!s.meals[k]}};break}
+    case "BUY":{
+      const pr=s.products.find(x=>x.id===a.id);if(!pr)return s;
+      const ap=a.cp!=null?a.cp:pr.price;
+      const p={...s.purchased,[a.id]:(s.purchased[a.id]||0)+(a.q||1)};
+      const lg=[...s.log,{id:a.id,n:pr.name,e:pr.emoji,q:a.q||1,up:ap,tot:ap*(a.q||1),dt:new Date().toLocaleDateString('ka-GE'),st:a.st||pr.store}];
+      const prods=a.cp!=null?s.products.map(x=>x.id===a.id?{...x,price:a.cp}:x):s.products;
+      const prods2=a.st?prods.map(x=>x.id===a.id?{...x,store:a.st}:x):prods;
+      n={...s,purchased:p,log:lg,spent:Math.round((s.spent+ap*(a.q||1))*100)/100,products:prods2};break;
+    }
+    case "UNBUY":{
+      const pr=s.products.find(x=>x.id===a.id);if(!pr||!s.purchased[a.id])return s;
+      const p={...s.purchased};p[a.id]=Math.max(0,p[a.id]-1);if(p[a.id]<=0)delete p[a.id];
+      const ll=[...s.log].reverse().find(l=>l.id===a.id);
+      const rf=ll?ll.up:pr.price;
+      const lg=s.log.slice();const idx=lg.findLastIndex(l=>l.id===a.id);if(idx>=0)lg.splice(idx,1);
+      n={...s,purchased:p,log:lg,spent:Math.max(0,Math.round((s.spent-rf)*100)/100)};break;
+    }
+    case "PRICE":{n={...s,products:s.products.map(p=>p.id===a.id?{...p,price:a.v}:p)};break}
+    case "STORE":{n={...s,products:s.products.map(p=>p.id===a.id?{...p,store:a.v}:p)};break}
+    case "ADD_PROD":{
+      const np={...a.prod,id:"c_"+Date.now()};
+      const prods=[...s.products,np];
+      const needs=a.qty?[...s.needs,{id:np.id,qty:a.qty}]:s.needs;
+      n={...s,products:prods,needs};break;
+    }
+    case "DEL_PROD":{
+      n={...s,products:s.products.filter(p=>p.id!==a.id),needs:s.needs.filter(n=>n.id!==a.id),purchased:{...s.purchased,[a.id]:undefined}};break;
+    }
+    case "WLOG":{
+      n={...s,wLog:[...s.wLog,{dt:new Date().toLocaleDateString('ka-GE'),w:a.w}],weight:a.w};break;
+    }
+    case "BUDGET":n={...s,budget:a.v};break;
+    case "RESET":n={...s,purchased:{},log:[],spent:0,meals:{}};break;
+    default:return s;
+  }
+  save(n);return n;
+}
+
+// ═══ COMPONENTS ═══
+function Bar({v,max,color,label,h=8}){
+  const pct=max>0?Math.min(100,Math.round(v/max*100)):0;
+  return React.createElement("div",{className:"bar-wrap"},
+    label&&React.createElement("div",{className:"bar-label"},React.createElement("span",null,label),React.createElement("span",{style:{color}},pct+"%")),
+    React.createElement("div",{className:"bar-bg",style:{height:h}},React.createElement("div",{className:"bar-fill",style:{width:pct+"%",background:color}}))
+  );
+}
+
+function Stat({v,u,l,color,icon}){
+  return React.createElement("div",{className:"stat",style:{background:color+"11",border:"1px solid "+color+"22"}},
+    React.createElement("div",{style:{fontSize:10}},icon),
+    React.createElement("div",{className:"val",style:{color}},v,u&&React.createElement("span",{style:{fontSize:11,fontWeight:500}},u)),
+    React.createElement("div",{className:"lbl"},l)
+  );
+}
+
+function Modal({open,close,title,children}){
+  if(!open)return null;
+  return React.createElement("div",{className:"overlay"},
+    React.createElement("div",{className:"overlay-bg",onClick:close}),
+    React.createElement("div",{className:"modal"},
+      React.createElement("div",{className:"modal-head"},
+        React.createElement("span",{className:"modal-title"},title),
+        React.createElement("button",{className:"modal-close",onClick:close},"✕")
+      ),children
+    )
+  );
+}
+
+// ═══ APP ═══
+function App(){
+  const [s,dispatch]=useReducer(reducer,init);
+  const [tab,setTab]=useState("home");
+  const [wi,setWi]=useState("");
+  const [sp,setSp]=useState(null);
+  // modals
+  const [ep,setEp]=useState(null);const [epV,setEpV]=useState("");const [esV,setEsV]=useState("");
+  const [ap,setAp]=useState(false);
+  const [bm,setBm]=useState(null);const [bq,setBq]=useState("1");const [bp,setBp]=useState("");const [bs,setBs]=useState("");
+  const [hm,setHm]=useState(false);
+  const [be,setBe]=useState(false);const [bi,setBi]=useState("");
+  const [np,setNp]=useState({name:"",unit:"კგ",price:"",prot:"",cal:"",store:"",emoji:"🍗",mq:"1"});
+
+  useEffect(()=>{const d=load();if(d)dispatch({type:"INIT",d});},[]);
+
+  const {products,needs,purchased,log,spent,budget,meals,wLog,day,weight}=s;
+  const tc=Math.round((10*weight+6.25*175-5*22+5)*1.55+450);
+  const tp=Math.round(weight*2.2);
+  const dm=MENU[day];
+  const dp=dm.meals.reduce((a,m)=>a+m.p,0);
+  const dc=dm.meals.reduce((a,m)=>a+m.c,0);
+  const cp=dm.meals.filter((_,i)=>meals[`${day}-${i}`]).reduce((a,m)=>a+m.p,0);
+  const cc=dm.meals.filter((_,i)=>meals[`${day}-${i}`]).reduce((a,m)=>a+m.c,0);
+  const rem=budget-spent;
+
+  const e=React.createElement;
+
+  // ─── TAB CONTENT ───
+  let content;
+
+  if(tab==="home"){
+    content=e("div",null,
+      // Weight
+      e("div",{className:"card"},
+        e("div",{style:{fontSize:13,fontWeight:700,color:"#ff6b35",marginBottom:8}},"🎯 წონის პროგრესი"),
+        e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}},
+          e("span",{style:{fontSize:26,fontWeight:900}},weight,e("span",{style:{fontSize:13,color:"#888"}},"კგ")),
+          e("span",{style:{color:"#555"}},"→"),
+          e("span",{style:{fontSize:26,fontWeight:900,color:"#ff6b35"}},"73",e("span",{style:{fontSize:13}},"კგ"))
+        ),
+        e(Bar,{v:Math.max(0,weight-62),max:11,color:"#ff6b35",label:`+${Math.max(0,weight-62).toFixed(1)}კგ / 11კგ`,h:10}),
+        e("div",{style:{display:"flex",gap:8,marginTop:10}},
+          e("input",{className:"inp",type:"number",placeholder:"ახალი წონა...",value:wi,onChange:x=>setWi(x.target.value)}),
+          e("button",{className:"btn btn-primary",onClick:()=>{if(wi){dispatch({type:"WLOG",w:parseFloat(wi)});setWi("")}}},"ჩაწერე")
+        )
+      ),
+      // Stats
+      e("div",{style:{display:"flex",gap:6,marginBottom:10}},
+        e(Stat,{v:tc,l:"კკალ/დღე",color:"#f7c948",icon:"🔥"}),
+        e(Stat,{v:tp,u:"გ",l:"პროტეინი",color:"#ff6b35",icon:"💪"}),
+        e(Stat,{v:rem.toFixed(0),u:"₾",l:"დარჩა",color:"#66bb6a",icon:"💰"})
+      ),
+      // Today
+      e("div",{className:"card"},
+        e("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:8}},
+          e("span",{style:{fontSize:12,fontWeight:700,color:"#4caf50"}},`📅 ${dm.emoji} ${dm.day}`),
+          e("span",{style:{fontSize:11,color:"#888"}},dm.meals.filter((_,i)=>meals[`${day}-${i}`]).length+"/6")
+        ),
+        e(Bar,{v:cp,max:dp,color:"#ff6b35",label:`პროტეინი: ${cp}/${dp}გ`}),
+        e("div",{style:{height:4}}),
+        e(Bar,{v:cc,max:dc,color:"#f7c948",label:`კალორია: ${cc}/${dc}`}),
+        e("button",{className:"btn btn-outline btn-full",style:{marginTop:10},onClick:()=>setTab("menu")},"მენიუს ნახვა →")
+      ),
+      // Weight history mini
+      wLog.length>0&&e("div",{className:"card"},
+        e("div",{style:{fontSize:12,fontWeight:700,color:"#888",marginBottom:6}},"📈 ბოლო ჩანაწერები"),
+        e("div",{style:{display:"flex",alignItems:"flex-end",gap:3,height:60}},
+          wLog.slice(-15).map((x,i)=>e("div",{key:i,style:{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:1}},
+            e("span",{style:{fontSize:7,color:"#888"}},x.w),
+            e("div",{style:{width:"100%",height:Math.max(4,((x.w-58)/17)*50),background:"linear-gradient(to top,#ff6b35,#f7c948)",borderRadius:2}})
+          ))
+        )
+      )
+    );
+  }
+
+  else if(tab==="menu"){
+    content=e("div",null,
+      e("div",{style:{display:"flex",gap:4,marginBottom:12,overflowX:"auto"}},
+        MENU.map((d,i)=>e("button",{key:i,className:"day-btn"+(day===i?" active":""),onClick:()=>dispatch({type:"DAY",v:i})},
+          e("div",{style:{fontSize:15}},d.emoji),
+          e("div",{style:{fontWeight:day===i?800:400}},d.day)
+        ))
+      ),
+      e("div",{style:{display:"flex",gap:6,marginBottom:12}},
+        e(Stat,{v:cp,u:`/${dp}`,l:"პროტეინი",color:"#ff6b35",icon:"💪"}),
+        e(Stat,{v:cc,u:`/${dc}`,l:"კალორია",color:"#f7c948",icon:"🔥"})
+      ),
+      e("div",{style:{display:"flex",flexDirection:"column",gap:5}},
+        dm.meals.map((m,mi)=>{
+          const k=`${day}-${mi}`;const done=meals[k];const exp=sp===k;
+          return e("div",{key:mi,className:"meal-card",style:{background:done?"rgba(76,175,80,.05)":"rgba(255,255,255,.03)",borderLeft:`4px solid ${done?"#4caf50":MC[mi]}`,opacity:done?.65:1}},
+            e("div",{style:{padding:"10px 12px"}},
+              e("div",{style:{display:"flex",alignItems:"center",gap:8}},
+                e("button",{className:"meal-check"+(done?" done":""),onClick:()=>dispatch({type:"MEAL",di:day,mi})},done?"✓":""),
+                e("div",{style:{flex:1}},
+                  e("div",{style:{display:"flex",justifyContent:"space-between"}},
+                    e("div",null,e("span",{style:{fontSize:10,color:"#666"}},m.t),e("span",{style:{fontSize:12,fontWeight:700,color:done?"#4caf50":"#fff",marginLeft:6}},m.l)),
+                    e("div",{style:{display:"flex",gap:4}},
+                      e("span",{className:"chip",style:{background:"#ff6b3518",color:"#ff6b35"}},m.p+"გ"),
+                      e("span",{className:"chip",style:{background:"#f7c94815",color:"#f7c948"}},m.c)
+                    )
+                  ),
+                  e("div",{style:{fontSize:11,color:"#999",marginTop:3,textDecoration:done?"line-through":"none"}},m.d)
+                )
+              ),
+              m.prep&&e("button",{className:"prep-btn",onClick:()=>setSp(exp?null:k)},exp?"🍳 დამალე":"🍳 მომზადება")
+            ),
+            exp&&m.prep&&e("div",{className:"prep-content"},"🍳 "+m.prep)
+          );
+        })
+      )
+    );
+  }
+
+  else if(tab==="shop"){
+    content=e("div",null,
+      e("div",{style:{display:"flex",gap:6,marginBottom:10}},
+        e("button",{className:"btn btn-outline btn-sm",onClick:()=>setHm(true)},"📜 ისტორია"),
+        e("button",{className:"btn btn-danger btn-sm",onClick:()=>{if(confirm("ახალი თვე? ყველაფერი წაიშლება"))dispatch({type:"RESET"})}},"🔄 ახალი თვე"),
+        e("div",{style:{flex:1}}),
+        e("button",{className:"btn btn-primary btn-sm",onClick:()=>setAp(true)},"➕")
+      ),
+      e(Bar,{v:spent,max:budget,color:rem<50?"#ef5350":"#ff6b35",label:`${spent.toFixed(0)}₾ / ${budget}₾ — ${rem.toFixed(0)}₾ დარჩა`,h:8}),
+      e("div",{style:{height:10}}),
+      e("div",{style:{display:"flex",flexDirection:"column",gap:4}},
+        needs.map((nd,i)=>{
+          const pr=products.find(x=>x.id===nd.id);if(!pr)return null;
+          const bt=purchased[nd.id]||0;const dn=bt>=nd.qty;const pct=nd.qty>0?Math.min(100,Math.round(bt/nd.qty*100)):0;
+          return e("div",{key:i,className:"shop-item"+(dn?" done":""),style:{background:dn?"rgba(76,175,80,.05)":"rgba(255,255,255,.03)"}},
+            e("div",{style:{display:"flex",alignItems:"center",gap:8}},
+              e("span",{style:{fontSize:20}},pr.emoji),
+              e("div",{style:{flex:1}},
+                e("div",{style:{display:"flex",justifyContent:"space-between"}},
+                  e("span",{style:{fontSize:12,fontWeight:700,color:dn?"#66bb6a":"#fff"}},dn?"✓ ":"",pr.name),
+                  e("button",{style:{background:"none",border:"none",cursor:"pointer",padding:0},onClick:()=>{setEp(pr);setEpV(String(pr.price));setEsV(pr.store)}},
+                    e("span",{style:{fontSize:11,color:"#ff6b35",fontWeight:700}},pr.price+"₾",e("span",{style:{color:"#555",fontWeight:400}},"/"+pr.unit)," ✏️")
+                  )
+                ),
+                e("div",{style:{fontSize:10,color:"#777",marginTop:2}},`${bt}/${nd.qty} ${pr.unit} · `,e("span",{style:{color:"#556"}},pr.store)),
+                e("div",{style:{marginTop:3,width:"100%",height:3,background:"rgba(255,255,255,.06)",borderRadius:10}},
+                  e("div",{style:{width:pct+"%",height:3,background:dn?"#4caf50":"#ff6b35",borderRadius:10,transition:"width .3s"}})
+                )
+              ),
+              e("div",{style:{display:"flex",flexDirection:"column",gap:3}},
+                e("button",{className:"qty-btn",style:{background:dn?"#333":"#ff6b35",color:dn?"#666":"#000"},onClick:()=>{setBm(pr);setBq("1");setBp("");setBs("")}},"+"),
+                e("button",{className:"qty-btn",style:{background:"rgba(255,255,255,.06)",color:"#888"},onClick:()=>dispatch({type:"UNBUY",id:nd.id})},"−")
+              )
+            )
+          );
+        })
+      )
+    );
+  }
+
+  else if(tab==="products"){
+    content=e("div",null,
+      e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}},
+        e("span",{style:{fontSize:14,fontWeight:700,color:"#ff6b35"}},"📦 პროდუქტები"),
+        e("button",{className:"btn btn-primary btn-sm",onClick:()=>setAp(true)},"➕ ახალი")
+      ),
+      e("div",{style:{fontSize:10,color:"#555",marginBottom:8}},"დააჭირე ფასის/მაღაზიის შესაცვლელად"),
+      e("div",{style:{display:"flex",padding:"6px 0",borderBottom:"1px solid #222"}},
+        e("span",{style:{flex:2,fontSize:10,fontWeight:700,color:"#555"}},"პროდუქტი"),
+        e("span",{style:{flex:1,fontSize:10,fontWeight:700,color:"#ff6b35",textAlign:"center"}},"ცილა"),
+        e("span",{style:{flex:1,fontSize:10,fontWeight:700,color:"#f7c948",textAlign:"center"}},"კკალ"),
+        e("span",{style:{flex:1,fontSize:10,fontWeight:700,color:"#66bb6a",textAlign:"center"}},"ფასი")
+      ),
+      products.sort((a,b)=>b.prot-a.prot).map((p,i)=>
+        e("div",{key:i,className:"prod-row",onClick:()=>{setEp(p);setEpV(String(p.price));setEsV(p.store)}},
+          e("span",{style:{flex:2,fontSize:11}},p.emoji+" "+p.name),
+          e("span",{style:{flex:1,fontSize:11,fontWeight:700,color:"#ff6b35",textAlign:"center"}},p.prot+"გ"),
+          e("span",{style:{flex:1,fontSize:11,color:"#f7c948",textAlign:"center"}},p.cal),
+          e("span",{style:{flex:1,fontSize:11,color:"#66bb6a",textAlign:"center"}},p.price+"₾")
+        )
+      ),
+      // Meal prep
+      e("div",{style:{marginTop:14,background:"rgba(247,201,72,.05)",borderRadius:12,padding:12,border:"1px solid rgba(247,201,72,.1)"}},
+        e("div",{style:{fontSize:12,fontWeight:700,color:"#f7c948",marginBottom:6}},"🍳 Meal Prep (კვირა)"),
+        ["ბრინჯი 1.5კგ მოხარშე — 20წთ","კვერცხი 15-18ც მოხარშე — 12წთ","ქათმის ფილე 1.5კგ შეწვი — 25წთ","ოსპი 500გ მოხარშე — 20წთ","კონტეინერებში დაალაგე — 10წთ"].map((x,i)=>
+          e("div",{key:i,style:{fontSize:11,color:"#bbb",padding:"3px 0"}},"▸ "+x)
+        )
+      )
+    );
+  }
+
+  else if(tab==="stats"){
+    const tdee=Math.round((10*weight+6.25*175-5*22+5)*1.55);
+    content=e("div",null,
+      e("div",{className:"card"},
+        e("div",{style:{fontSize:13,fontWeight:700,color:"#ff6b35",marginBottom:10}},"📈 წონის ისტორია"),
+        wLog.length===0?e("div",{style:{textAlign:"center",padding:20,color:"#555"}},"⚖️ ჯერ არ ჩაგიწერია"):
+        e("div",null,
+          e("div",{style:{display:"flex",alignItems:"flex-end",gap:3,height:100}},
+            wLog.slice(-20).map((x,i)=>e("div",{key:i,style:{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:1}},
+              e("span",{style:{fontSize:8,color:"#888"}},x.w),
+              e("div",{style:{width:"100%",height:Math.max(6,((x.w-58)/17)*100)+"%",minHeight:6,background:"linear-gradient(to top,#ff6b35,#f7c948)",borderRadius:3}})
+            ))
+          ),
+          e("div",{style:{textAlign:"center",fontSize:10,color:"#555",borderTop:"1px dashed #333",paddingTop:4,marginTop:4}},"სამიზნე: 73კგ")
+        )
+      ),
+      e("div",{className:"card"},
+        e("div",{style:{fontSize:13,fontWeight:700,color:"#f7c948",marginBottom:8}},"🔬 მაკროები"),
+        e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}},
+          [{l:"TDEE",v:tdee},{l:"სამიზნე",v:tc},{l:"პროტეინი",v:tp+"გ"},{l:"ცხიმი",v:Math.round(weight*.9)+"გ"},{l:"ნახშწყ.",v:Math.round((tc-tp*4-Math.round(weight*.9)*9)/4)+"გ"},{l:"სურპლუსი",v:"+450"}].map((x,i)=>
+            e("div",{key:i,style:{background:"#111",borderRadius:8,padding:"8px 6px",textAlign:"center"}},
+              e("div",{style:{fontSize:9,color:"#666"}},x.l),e("div",{style:{fontSize:15,fontWeight:800}},x.v)
+            )
+          )
+        )
+      ),
+      e("div",{className:"card"},
+        e("div",{style:{fontSize:13,fontWeight:700,color:"#66bb6a",marginBottom:8}},"💰 ბიუჯეტი"),
+        e("div",{style:{display:"flex",gap:6}},e(Stat,{v:spent.toFixed(0),u:"₾",l:"დახარჯული",color:"#ef5350",icon:"💸"}),e(Stat,{v:rem.toFixed(0),u:"₾",l:"დარჩა",color:"#66bb6a",icon:"💰"})),
+        e(Bar,{v:spent,max:budget,color:"#ff6b35",label:`ბიუჯეტის ${Math.round(spent/budget*100)}%`,h:8}),
+        log.length>0&&e("div",{style:{marginTop:8}},
+          e("div",{style:{fontSize:11,color:"#888",marginBottom:4}},"ბოლო შეძენები:"),
+          [...log].reverse().slice(0,5).map((l,i)=>e("div",{key:i,style:{display:"flex",justifyContent:"space-between",fontSize:11,padding:"3px 0",borderBottom:"1px solid #1a1a1a"}},
+            e("span",{style:{color:"#bbb"}},l.e+" "+l.n+" ×"+l.q),
+            e("span",{style:{color:"#ff6b35",fontWeight:700}},l.tot.toFixed(1)+"₾ ",e("span",{style:{color:"#555",fontWeight:400}},"("+l.up+"₾)"))
+          ))
+        )
+      )
+    );
+  }
+
+  // ─── RENDER ───
+  return e("div",null,
+    // Header
+    e("div",{className:"header"},
+      e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+        e("div",null,
+          e("div",{style:{fontSize:20,fontWeight:900,color:"#0a0a0f"}},"BULK MODE 🏋️"),
+          e("div",{style:{fontSize:11,color:"#333",fontWeight:600}},weight+"კგ → 73კგ · "+tc+"კკალ/დღე")
+        ),
+        e("div",{onClick:()=>{setBe(true);setBi(String(budget))},style:{background:"rgba(0,0,0,.12)",borderRadius:10,padding:"6px 12px",textAlign:"center",cursor:"pointer"}},
+          e("div",{style:{fontSize:16,fontWeight:900,color:"#0a0a0f"}},rem.toFixed(0)+"₾"),
+          e("div",{style:{fontSize:8,color:"#333",fontWeight:600}},"დარჩენილი ▾")
+        )
+      ),
+      e("div",{style:{marginTop:6}},
+        e(Bar,{v:spent,max:budget,color:"#0a0a0f",h:5}),
+        e("div",{style:{display:"flex",justifyContent:"space-between",fontSize:9,color:"#444",marginTop:2}},
+          e("span",null,spent.toFixed(0)+"₾ დახარჯული"),e("span",null,budget+"₾"))
+      )
+    ),
+    // Content
+    e("div",{className:"content"},content),
+    // Bottom nav
+    e("div",{className:"tab-bar"},
+      [{id:"home",icon:"🏠",l:"მთავარი"},{id:"menu",icon:"🍽️",l:"მენიუ"},{id:"shop",icon:"🛒",l:"საყიდლები"},{id:"products",icon:"📦",l:"პროდუქტები"},{id:"stats",icon:"📊",l:"სტატისტიკა"}].map(t=>
+        e("button",{key:t.id,className:"tab-btn"+(tab===t.id?" active":""),onClick:()=>setTab(t.id)},
+          e("div",{className:"icon"},t.icon),e("div",{className:"label"},t.l)
+        )
+      )
+    ),
+    // ═══ MODALS ═══
+    // Budget
+    e(Modal,{open:be,close:()=>setBe(false),title:"💰 ბიუჯეტი"},
+      e("input",{className:"inp",type:"number",value:bi,onChange:x=>setBi(x.target.value),placeholder:"ახალი ბიუჯეტი..."}),
+      e("div",{style:{height:10}}),
+      e("button",{className:"btn btn-primary btn-full",onClick:()=>{if(bi){dispatch({type:"BUDGET",v:parseFloat(bi)});setBe(false)}}},"შენახვა")
+    ),
+    // Buy
+    e(Modal,{open:!!bm,close:()=>setBm(null),title:bm?`${bm.emoji} ${bm.name} — შეძენა`:""},
+      bm&&e("div",null,
+        e("div",{style:{background:"#111",borderRadius:12,padding:12,marginBottom:12}},
+          e("div",{style:{fontSize:12,color:"#888",marginBottom:4}},"ნაგულისხმევი: ",e("span",{style:{color:"#ff6b35",fontWeight:700}},bm.price+"₾/"+bm.unit)),
+          e("div",{style:{fontSize:12,color:"#888"}},"მაღაზია: ",e("span",{style:{color:"#66bb6a"}},bm.store))
+        ),
+        e("div",{style:{fontSize:12,fontWeight:700,color:"#f7c948",marginBottom:6}},"რაოდენობა ("+bm.unit+")"),
+        e("input",{className:"inp",type:"number",value:bq,onChange:x=>setBq(x.target.value)}),
+        e("div",{style:{fontSize:12,fontWeight:700,color:"#f7c948",marginTop:12,marginBottom:6}},"ფაქტიური ფასი (₾/"+bm.unit+") ",e("span",{style:{color:"#888",fontWeight:400}},"თუ განსხვავდება")),
+        e("input",{className:"inp",type:"number",value:bp,onChange:x=>setBp(x.target.value),placeholder:bm.price+" (ნაგულისხმევი)"}),
+        e("div",{style:{fontSize:12,fontWeight:700,color:"#f7c948",marginTop:12,marginBottom:6}},"სად იყიდე?"),
+        e("input",{className:"inp",value:bs,onChange:x=>setBs(x.target.value),placeholder:bm.store}),
+        e("div",{style:{marginTop:14,background:"rgba(255,107,53,.06)",borderRadius:10,padding:10,textAlign:"center"}},
+          "სულ: ",e("span",{style:{fontWeight:900,color:"#ff6b35",fontSize:18}},((bp?parseFloat(bp):bm.price)*(parseFloat(bq)||1)).toFixed(1)+"₾")
+        ),
+        e("div",{style:{height:12}}),
+        e("button",{className:"btn btn-primary btn-full",onClick:()=>{
+          dispatch({type:"BUY",id:bm.id,q:parseFloat(bq)||1,cp:bp?parseFloat(bp):null,st:bs||undefined});
+          setBm(null);setBq("1");setBp("");setBs("");
+        }},"✓ ვიყიდე")
+      )
+    ),
+    // Edit price
+    e(Modal,{open:!!ep,close:()=>setEp(null),title:ep?`✏️ ${ep.emoji} ${ep.name}`:""},
+      ep&&e("div",null,
+        e("div",{style:{fontSize:12,color:"#888",marginBottom:8}},"ახლანდელი: ",e("span",{style:{color:"#ff6b35",fontWeight:700}},ep.price+"₾/"+ep.unit)," · ",e("span",{style:{color:"#66bb6a"}},ep.store)),
+        e("div",{style:{fontSize:12,fontWeight:700,color:"#f7c948",marginBottom:6}},"ახალი ფასი (₾)"),
+        e("input",{className:"inp",type:"number",value:epV,onChange:x=>setEpV(x.target.value)}),
+        e("div",{style:{fontSize:12,fontWeight:700,color:"#f7c948",marginTop:10,marginBottom:6}},"მაღაზია"),
+        e("input",{className:"inp",value:esV,onChange:x=>setEsV(x.target.value)}),
+        e("div",{style:{height:12}}),
+        e("div",{style:{display:"flex",gap:8}},
+          e("button",{className:"btn btn-primary",style:{flex:1},onClick:()=>{
+            if(epV)dispatch({type:"PRICE",id:ep.id,v:parseFloat(epV)});
+            if(esV)dispatch({type:"STORE",id:ep.id,v:esV});
+            setEp(null);
+          }},"💾 შენახვა"),
+          ep.id.startsWith("c_")&&e("button",{className:"btn btn-danger",onClick:()=>{dispatch({type:"DEL_PROD",id:ep.id});setEp(null)}},"🗑️ წაშლა")
+        )
+      )
+    ),
+    // Add product
+    e(Modal,{open:ap,close:()=>setAp(false),title:"➕ ახალი პროდუქტი"},
+      e("div",{style:{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}},
+        EMOJIS.map(em=>e("button",{key:em,className:"emoji-btn",style:{background:np.emoji===em?"#ff6b35":"#222"},onClick:()=>setNp({...np,emoji:em})},em))
+      ),
+      e("div",{style:{display:"flex",flexDirection:"column",gap:8}},
+        e("input",{className:"inp",value:np.name,onChange:x=>setNp({...np,name:x.target.value}),placeholder:"სახელი *"}),
+        e("div",{style:{display:"flex",gap:8}},
+          e("input",{className:"inp",type:"number",value:np.price,onChange:x=>setNp({...np,price:x.target.value}),placeholder:"ფასი (₾) *"}),
+          e("input",{className:"inp",value:np.unit,onChange:x=>setNp({...np,unit:x.target.value}),placeholder:"ერთეული",style:{maxWidth:100}})
+        ),
+        e("div",{style:{display:"flex",gap:8}},
+          e("input",{className:"inp",type:"number",value:np.prot,onChange:x=>setNp({...np,prot:x.target.value}),placeholder:"ცილა/100გ"}),
+          e("input",{className:"inp",type:"number",value:np.cal,onChange:x=>setNp({...np,cal:x.target.value}),placeholder:"კკალ/100გ"})
+        ),
+        e("input",{className:"inp",value:np.store,onChange:x=>setNp({...np,store:x.target.value}),placeholder:"მაღაზია"}),
+        e("div",{style:{display:"flex",gap:8,alignItems:"center"}},
+          e("input",{className:"inp",type:"number",value:np.mq,onChange:x=>setNp({...np,mq:x.target.value}),placeholder:"თვიური რაოდენობა",style:{maxWidth:140}}),
+          e("span",{style:{fontSize:11,color:"#888"}},"თვეში")
+        )
+      ),
+      e("div",{style:{height:14}}),
+      e("button",{className:"btn btn-primary btn-full",disabled:!np.name||!np.price,onClick:()=>{
+        dispatch({type:"ADD_PROD",prod:{name:np.name,unit:np.unit||"ცალი",price:parseFloat(np.price),prot:parseFloat(np.prot)||0,cal:parseFloat(np.cal)||0,store:np.store||"—",emoji:np.emoji},qty:parseInt(np.mq)||1});
+        setNp({name:"",unit:"კგ",price:"",prot:"",cal:"",store:"",emoji:"🍗",mq:"1"});setAp(false);
+      }},"➕ დამატება")
+    ),
+    // History
+    e(Modal,{open:hm,close:()=>setHm(false),title:"📜 შეძენების ისტორია"},
+      log.length===0?e("div",{style:{textAlign:"center",padding:30,color:"#666"}},"ჯერ არაფერი"):
+      e("div",{style:{display:"flex",flexDirection:"column",gap:4}},
+        [...log].reverse().map((l,i)=>e("div",{key:i,className:"history-item"},
+          e("span",{style:{fontSize:20}},l.e),
+          e("div",{style:{flex:1}},
+            e("div",{style:{fontSize:12,fontWeight:700}},l.n," ×",l.q),
+            e("div",{style:{fontSize:10,color:"#666"}},l.dt," · ",l.st)
+          ),
+          e("div",{style:{textAlign:"right"}},
+            e("div",{style:{fontSize:13,fontWeight:800,color:"#ff6b35"}},l.tot.toFixed(1)+"₾"),
+            e("div",{style:{fontSize:10,color:"#888"}},l.up+"₾/ცალი")
+          )
+        )),
+        e("div",{style:{textAlign:"center",padding:8,fontSize:13,fontWeight:800,color:"#f7c948"}},"სულ: "+log.reduce((s,l)=>s+l.tot,0).toFixed(1)+"₾")
+      )
+    )
+  );
+}
+
+ReactDOM.render(React.createElement(App),document.getElementById("root"));
+</script>
+</body>
+</html>
